@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="context-path" th:content="@{/}"/>
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}"
+	integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+	crossorigin="anonymous">
+<link rel="stylesheet" th:href="@{/css/docs.min.css}">
+
+<title>组织登记与短应用授权</title>
+</head>
+<body>
+<input type="hidden" id="username" name="username" th:value="${userinfo.name}">
+  <header
+    class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar">
+    <a class="navbar-brand" href="/">短应用&trade;</a>
+
+    <div class="navbar-nav-scroll">
+      <ul class="navbar-nav bd-navbar-nav flex-row">
+        <li class="nav-item">
+          <a class="nav-link" href="/abd/my">我的短应用</a>
+        </li>
+      </ul>
+    </div>
+
+    <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+
+    </ul>
+    <span class="navbar-text" th:text="${userinfo.name}">
+      Navbar text with an inline element
+    </span>
+  </header>
+	<div class="container-fluid">
+		<div class="row">
+			<!-- 左边已注册短应用 -->
+			<div class="col-12 col-md-9 sa-all">
+				<p></p>
+				<div class="container-fluid">
+					<div class="row">
+
+					</div>
+				</div>
+				<p></p>
+			</div>
+			<!-- 右边注册短应用 -->
+			<div class="col-12 col-md-3">
+				<p></p>
+				<form class="saRegisterForm" enctype="multipart/form-data">
+					<div class="form-group">
+						<label for="saName">组织简称</label>
+						<input type="text"
+							   class="form-control form-control-sm" id="saName" name="simpleName"
+							   aria-describedby="nameHelp" placeholder="例如：工时统计">
+						<small
+								class="form-text text-muted">请使用尽量短的文字描述该应用的功能.</small>
+					</div>
+					<div class="form-group">
+						<label for="saDescription">组织全称</label>
+						<textarea class="form-control" id="saDescription" name="fullName" rows="2"></textarea>
+					</div>
+					<div class="form-group">
+						<label for="saName">组织登记人</label>
+						<input type="text"
+							   class="form-control form-control-sm" id="register" name="register"
+							   aria-describedby="nameHelp" placeholder="例如：工时统计">
+						<small
+								class="form-text text-muted">请使用尽量短的文字描述该应用的功能.</small>
+					</div>
+					<div class="form-group">
+						<label for="saPrefix">子域名</label>
+						<input type="text"
+							   class="form-control form-control-sm" id="saPrefix" name="subDomain"
+							   aria-describedby="prefixHelp" placeholder="例如：BAC">
+						<small
+								class="form-text text-muted">请输入三位字母组成的短应用前缀，A**和X**平台已占用，不能使用.</small>
+					</div>
+					<div class="form-group custom-control custom-checkbox">
+						<input type="checkbox" class="custom-control-input" id="saGroupAuthorize" name="saGroupAuthorize" value="AUTHORIZED">
+						<label class="custom-control-label" for="saGroupAuthorize">组织认证</label>
+					</div>
+					<div class="form-group">
+						<label for="saLogo">组织Logo</label>
+						<input type="file"
+							   name="groupLogo" class="form-control-file fileUpload"
+							   id="saLogo">
+						<div class="preview"></div>
+					</div>
+					<button type="button" id="saregister" class="btn btn-primary">登记</button>
+				</form>
+			</div>
+		</div>
+	</div>
+  <p></p>
+
+	<div class="card" id="sadetail" style="width: 18rem; display: none;">
+		<img class="card-img-top" data-src="holder.js/100px180/"
+			 alt="Card image cap">
+		<div class="card-body">
+			<h5 class="card-title">Card title</h5>
+			<p class="card-text">Some quick example text to build on the card
+				title and make up the bulk of the card's content.</p>
+			<a href="#" class="btn btn-primary">Go somewhere</a>
+		</div>
+	</div>
+	<!-- Optional JavaScript -->
+	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+	<script th:src="@{/jquery/js/jquery-3.3.1.min.js}"></script>
+	<script th:src="@{/jquery/js/popper.min.js}"
+		integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+		crossorigin="anonymous"></script>
+	<script th:src="@{/bootstrap/js/bootstrap.min.js}"
+		integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+		crossorigin="anonymous"></script>
+	<script th:src="@{/js/jquery.form.js}"></script>
+	<script th:src="@{/js/holder.min.js}"></script>
+	<script th:src="@{/fileupload/js/vendor/jquery.ui.widget.js}"></script>
+	<script th:src="@{/fileupload/js/jquery.fileupload.js}"></script>
+  <script src="/aad/xiaoji/js/menus.js"></script>
+	<script type="text/javascript">
+        var subDoMain = window.location.host.split('.', 1)[0];
+        var username = $("input#username").val();
+        function parseDom(nodelist) { //nodelist是html文本字符串
+            var objE = document.createElement("p");
+            objE.innerHTML = nodelist;
+            return objE.childNodes;
+        }
+        function refresh(){
+            var Data = "";
+            $.ajax({
+                url : window.location.protocol + "//" + window.location.host + "/abd/data/usergroups?username=" + username,
+                type: "post",
+                data: "",
+                dataType: "json",
+                contentType: "application/json;charset=UTF-8",
+                success : function(data) {
+                    Data = data;
+                    var str = "";
+                    str = str + "<p></p>";
+                    for(var i = 0;i< Data.data.length; i++){
+                        str = str + "<div class='saGroupName'><h3>" + Data.data[i].fullName + "</h3>"+ "<div class='dv1' >" + "<div class='dv2'>";
+                        var saData=searchAllSa(Data.data[i].subDomain)
+                        if(saData!=null&&saData.saList.length>0) {
+                            for(var j=0;j<=saData.saList.length-1;j++){
+                                str = str +
+                                    "<div class='dv3'> " +
+                                    "<p></p> " +
+                                    "  	<div  class='dv4'> " +
+                                    " 	<img class='dv5' " +
+                                    "		data-src='holder.js/100px140/?text=SA Icon'" + "alt='Card image cap' " +
+                                    "		src='" + window.location.protocol + "//" + window.location.host + "/abc/logos/" + saData.saList[j].logoPath + "'" +
+                                    "		class='rounded mx-auto-d-block' alt='' width='70px' height='140px'" +
+                                    "		> " +
+                                    "	<div class='dv6'> " +
+                                    "	<p class='dv7' value='"+saData.saList[j].saDescription+"'>" + saData.saList[j].saName + "</p>" +
+                                    "   </div> " +
+                                    "</div> " +
+                                    "</div> "
+                            }
+                        }
+                        str = str +
+                            "<!-- col-md-2 col-xs-3 -->" +
+                            "<div class='dv3'> "+
+                            "<p></p>" +
+                            "    <div  class='dv1-1' data-toggle='modal' data-target='#myModal' value='"+Data.data[i].subDomain+"'> " +
+                            "    <img class='dv5'" +
+                            "		data-src='holder.js/100px140/?text=Add SA&theme=vine'" +
+                            "		alt='Card image cap'src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22203%22%20height%3D%22140%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20203%20140%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_165a2c8da61%20text%20%7B%20fill%3A%231E292C%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_165a2c8da61%22%3E%3Crect%20width%3D%22203%22%20height%3D%22140%22%20fill%3D%22%2339DBAC%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2277.4375%22%20y%3D%2274.5%22%3EAdd%20SA%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E'> "+
+                            "    <div class='dv6'> " +
+                            "    <p class='dv7' >添加短应用</p> " +
+                            "    </div> " +
+                            "    </div> " +
+                            "    </div> " +
+                            "    <!-- col-md-2 col-xs-3 --> " +
+                            "    </div> " +
+                            "    </div></div>"
+
+                    }
+                    $(".sa-all").empty().append(str);
+                    $(".dv1").addClass("container-fluid").removeClass("dv1");
+                    $(".dv2").addClass("row").removeClass("dv2");
+                    $(".dv3").addClass("col-md-2 col-xs-3").removeClass("dv3");
+                    $(".dv4").addClass("card").removeClass("dv4");
+                    $(".dv5").addClass("card-img-top").removeClass("dv5");
+                    $(".dv6").addClass("card-body").removeClass("dv6");
+                    $(".dv7").addClass("card-text").removeClass("dv7");
+                    $(".dv1-1").addClass("card add");
+
+                },
+                error : function(data) {
+                    console.log(data);
+                }
+            });
+        }
+        function searchAllSa(subDomain) {
+            var outData=null
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + "/abd/data/usergroupssa",
+                type: "post",
+                traditional:true,
+                dataType: "json",
+                contentType: false,
+                data: subDomain,
+                cache: false,
+                processData: false,
+                async: false,
+                success: function (data) {
+                    outData = data
+
+                },
+                error: function (data) {
+                    outData = null
+                },
+            })
+            return outData
+        }
+        $(document).ready(function () {
+            refresh();
+        })
+
+        $(".container-fluid").on("click",".dv1-1",function (event) {
+
+        })
+        $("#saregister").bind(
+            "click",
+            function (event) {
+                var formData = new FormData($(".saRegisterForm")[0]);
+                $.ajax({
+                    url: window.location.protocol + "//" + window.location.host + "/abd/data/addgroup",
+                    type: "post",
+                    data: formData,
+                    // headers: {"ClientCallMode" : "ajax"},
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    async: true,
+                    success: function (data) {
+                        var Data = "";
+                        alert("SUCCESS")
+                        refresh()
+
+                    },
+                    error: function (data) {
+                        alert(data)
+                    },
+                });
+                return false;
+            });
+	</script>
+	<script type="text/javascript">
+        $(function() {
+            var ttoh = $("#sadetail").outerHeight();
+            var ttow = $("#sadetail").outerWidth();
+            $("div.container-fluid div.card").not("div.add")
+                .mouseover(
+                    function(e) {
+                        var card = $(e.currentTarget);
+                        var tooTip = $("#sadetail");
+                        var domm = tooTip.children();
+                        var ncard = card.children();
+                        domm[0].src = ncard[0].src;
+                        domm[1].children[0].innerText = ncard[1].children[0].innerText;
+                        domm[1].children[1].innerText =$(ncard[1].children[0]).attr("value")
+                        tooTip.attr("actived", "false").hide();
+
+                        ttoh = $("#sadetail").outerHeight() > ttoh ? $("#sadetail").outerHeight() : ttoh;
+                        ttow = $("#sadetail").outerWidth() > ttow ? $("#sadetail").outerWidth() : ttow;
+
+                        if (tooTip.is("[actived='true']")) {
+                            console.log("actived")
+                        } else {
+                            // 鼠标移出弹出内容区域，隐藏弹出内容
+                            tooTip.mouseout(function(e) {
+                                $(this).attr("actived", "false").hide();
+                            });
+
+                            // 弹出内容顶部位置
+                            var pt = (card.offset().top + card.outerHeight() / 2 - ttoh / 2);
+                            // 弹出内容左边位置
+                            var pl = (card.offset().left + card.outerWidth() / 2 - ttow / 2);
+
+                            // 头部区域高度
+                            var hheight = $("header").outerHeight();
+                            // 可视区域高度
+                            var wheight = $(window).height();
+                            // 滚动高度
+                            var sctop = $(document).scrollTop();
+                            // 弹出内容最高位置
+                            var pmax = (pt + ttoh);
+
+                            // 底部超出可视区域
+                            if (pmax > (wheight + sctop)) {
+                                pt = wheight + sctop - ttoh - 10;
+                            }
+
+                            // 顶部超出可视区域
+                            if (pt < sctop + hheight) {
+                                pt = sctop + hheight + 10;
+                            }
+
+                            // 弹出内容
+                            tooTip
+                                .attr("actived", "true")
+                                .css(
+                                    {
+                                        position : "absolute",
+                                        'top' : (pt > 10 ? pt : 10) + "px",
+                                        "left" : (pl > 10 ? pl : 10)	+ "px"
+                                    }).show("fast");
+                        }
+                    });
+        });
+	</script>
+	<script type="text/javascript">
+		$(".saregister").bind(
+				"click",
+				function(event) {
+					$.ajax({
+						url : window.location.protocol + "//"
+								+ window.location.host + "/abd/data/addgroup",
+						type : "post",
+						data : $(".saRegisterForm").serialize(),
+						headers : {
+							"ClientCallMode" : "ajax"
+						},
+						success : function(data) {
+							console.log(data);
+						},
+						error : function(data) {
+							console.log(data);
+						}
+					});
+					return false;
+				});
+	</script>
+</body>
+</html>

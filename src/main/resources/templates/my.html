@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport"
+  content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="context-path" th:content="@{/}"/>
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}"
+  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+  crossorigin="anonymous">
+<link rel="stylesheet" th:href="@{/css/docs.min.css}">
+
+<title>我的短应用</title>
+</head>
+<body>
+<input type="hidden" id="username" name="username" th:value="${userinfo.name}">
+  <header
+    class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar">
+    <a class="navbar-brand" href="/">短应用&trade;</a>
+
+    <div class="navbar-nav-scroll">
+      <ul class="navbar-nav bd-navbar-nav flex-row">
+	      <li class="nav-item">
+	        <a class="nav-link active" href="/abd/my">我的短应用</a>
+	      </li>
+      </ul>
+    </div>
+
+    <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+
+    </ul>
+		<span class="navbar-text" th:text="${userinfo.name}">
+      Navbar text with an inline element
+    </span>
+  </header>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- 左边已注册短应用 -->
+      <div class="col-12 col-md-9" id="mygroups">
+      </div>
+      <!-- 右边注册短应用 -->
+      <div class="col-12 col-md-3">
+        <p></p>
+        <form class="saRegisterForm" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="saName">组织内昵称</label> <input type="text"
+              class="form-control form-control-sm" id="userName"
+              aria-describedby="nameHelp" th:value="${userinfo.name}" placeholder="例如：姓名"> <small
+              id="emailHelp" class="form-text text-muted">请使用在组织内沟通使用的正式名称.</small>
+          </div>
+          <button type="button" id="saveusername" class="btn btn-primary">保存</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <p></p>
+  <script th:src="@{/jquery/js/jquery-3.3.1.min.js}"></script>
+  <script th:src="@{/jquery/js/popper.min.js}"
+    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+  <script th:src="@{/bootstrap/js/bootstrap.min.js}"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+  <script th:src="@{/js/jquery.form.js}"></script>
+  <script th:src="@{/js/holder.min.js}"></script>
+  <script th:src="@{/xiaoji/js/shortapplication.js}"></script>
+  <script src="/aad/xiaoji/js/menus.js"></script>
+  <script type="text/javascript">
+	$(function() {
+		var mygroups = function(callback) { 
+			$.bridge("abd", "/my/groups", {
+        type: "post",
+        data: {},
+        dataType: "json",
+				success: callback,
+        error: function(resp) {
+            
+        }
+			});
+		}
+    var mygroupsas = function(subdomain, callback) { 
+        $.bridge("abd", "/my/" + subdomain + "/groupsas", {
+          type: "post",
+          data: {},
+          dataType: "json",
+          success: callback,
+          error: function(resp) {
+        	  
+          }
+        });
+    }
+
+    // 更新用户名称
+    $("#saveusername").on("click", function() {
+    	  var username = $("#userName").val();
+        $.bridge("abd", "/my/www/updateusername", {
+            type: "post",
+            data: {'username': username},
+            dataType: "json",
+            success: function(resp) {
+            	console.log(resp);
+            	$("header > span.navbar-text").text(username);
+            },
+            error: function(resp) {
+            	console.log(resp);
+            }
+          });
+    });
+
+    // 查询当前用户加入的组织
+    mygroups(function(res){
+    	console.log(res);
+    	if (res.data != null) {
+    		$.each(res.data, function(i, n) {
+ 	        var grouphtml = '<p></p>' +
+             '<h3>' + n.name + '</h3>' +
+             '<div class="container-fluid">' +
+             '  <div class="row" id="' + n.subDomain + '">' +
+             '  </div>' +
+             '</div>';
+
+          $("#mygroups").append($(grouphtml));
+          
+    			// 查询当前用户使用过的短应用
+    			mygroupsas(n.subDomain, function(sares) {
+ 			      console.log(sares);
+ 			      if (sares.data != null) {
+ 			    	  $.each(sares.data, function(i, m) {
+ 			    		  var groupsahtml = '<!-- col-xs-2 col-lg-3 col-md-4 -->' +
+								 			            '<div class="col-xs-2 col-lg-3 col-md-4" id="' + n.subDomain + '_' + m.saPrefix + '">' +
+								 			            '  <p></p>' +
+								 			            '  <div class="card">' +
+								 			            '    <img class="card-img-top"' +
+								 			            '      data-src="holder.js/100px140/?theme=vine&text=' + m.saName + '"' +
+								 			            '      alt="' + m.saName + '">' +
+								 			            '    <div class="card-body">' +
+								 			            '      <p class="card-text">' + m.saName+ '</p>' +
+								 			            '      <a href="/' + m.saPrefix + '/index" class="btn btn-sm btn-warning">进入</a>' +
+								 			            '    </div>' +
+								 			            '  </div>' +
+								 			            '</div>';
+
+								var $groupsahtml = $(groupsahtml);
+ 			    		  $("#" + n.subDomain).append($groupsahtml);
+ 			    		 Holder.run({
+ 			    			images: ".card-img-top"
+ 			    		 });
+ 			    	  });
+ 			      }
+    			});
+    		});
+    	}
+    });
+	});
+  </script>
+</body>
+</html>
